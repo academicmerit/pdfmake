@@ -3999,8 +3999,9 @@ var TRAILING = /(\s)+$/g;
  * @constructor
  * @param {FontProvider} fontProvider
  */
-function TextTools(fontProvider) {
+function TextTools(fontProvider, docMeasure) {
 	this.fontProvider = fontProvider;
+	this.docMeasure = docMeasure;
 }
 
 /**
@@ -4012,7 +4013,7 @@ function TextTools(fontProvider) {
  * @return {Object}                   collection of inlines, minWidth, maxWidth
  */
 TextTools.prototype.buildInlines = function (textArray, styleContextStack) {
-	var measured = measure(this.fontProvider, textArray, styleContextStack);
+	var measured = measure(this.fontProvider, textArray, styleContextStack, this.docMeasure);
 
 	var minWidth = 0,
 		maxWidth = 0,
@@ -4148,6 +4149,11 @@ function normalizeTextArray(array, styleContextStack) {
 		var style = null;
 		var words;
 
+                if (item.image) {
+                        results.push(item)
+                        continue
+                }
+
 		var noWrap = getStyleProperty(item || {}, styleContextStack, 'noWrap', false);
 		if (isObject(item)) {
 			words = splitWords(normalizeString(item.text), noWrap);
@@ -4209,7 +4215,7 @@ function getStyleProperty(item, styleContextStack, property, defaultValue) {
 	}
 }
 
-function measure(fontProvider, textArray, styleContextStack) {
+function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 	var normalized = normalizeTextArray(textArray, styleContextStack);
 
 	if (normalized.length) {
@@ -4241,10 +4247,14 @@ function measure(fontProvider, textArray, styleContextStack) {
 
 		var font = fontProvider.provideFont(fontName, bold, italics);
 
-		item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
-		item.height = font.lineHeight(fontSize) * lineHeight;
+                if (item.image) {
+			docMeasure.measureImage(item)
+		} else {
+			item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
+			item.height = font.lineHeight(fontSize) * lineHeight;
+		}
 
-		var leadingSpaces = item.text.match(LEADING);
+		var leadingSpaces = item.text ? item.text.match(LEADING) : [' '];
 
 		if (!item.leadingCut) {
 			item.leadingCut = 0;
@@ -4254,7 +4264,7 @@ function measure(fontProvider, textArray, styleContextStack) {
 			item.leadingCut += widthOfString(leadingSpaces[0], font, fontSize, characterSpacing, fontFeatures);
 		}
 
-		var trailingSpaces = item.text.match(TRAILING);
+		var trailingSpaces = item.text ? item.text.match(TRAILING) : [' '];
 		if (trailingSpaces) {
 			item.trailingCut = widthOfString(trailingSpaces[0], font, fontSize, characterSpacing, fontFeatures);
 		} else {
@@ -8543,7 +8553,7 @@ Line.prototype.getAscenderHeight = function () {
 	var y = 0;
 
 	this.inlines.forEach(function (inline) {
-		y = Math.max(y, inline.font.ascender / 1000 * inline.fontSize);
+		y = Math.max(y, inline.font.ascender / 1000 * (inline.image ? inline._height : inline.fontSize));
 	});
 	return y;
 };
@@ -13484,7 +13494,11 @@ function renderLine(line, x, y, pdfKitDoc) {
 
 		pdfKitDoc._font = inline.font;
 		pdfKitDoc.fontSize(inline.fontSize);
-		pdfKitDoc.text(inline.text, x + inline.x, y + shiftToBaseline, options);
+                if (inline.image) {
+		        pdfKitDoc.image(inline.image, x + inline.x, y, {width: inline.width});
+                } else {
+		        pdfKitDoc.text(inline.text, x + inline.x, y + shiftToBaseline, options);
+                }
 
 		if (inline.linkToPage) {
 			var _ref = pdfKitDoc.ref({Type: 'Action', S: 'GoTo', D: [inline.linkToPage, 0, 0]}).end();
@@ -14339,7 +14353,7 @@ LayoutBuilder.prototype.buildNextLine = function (textNode) {
 	while (textNode._inlines && textNode._inlines.length > 0 && line.hasEnoughSpaceForInline(textNode._inlines[0])) {
 		var inline = textNode._inlines.shift();
 
-		if (!inline.noWrap && inline.text.length > 1 && inline.width > line.maxWidth) {
+		if (!inline.noWrap && (!inline.text || inline.text.length > 1) && inline.width > line.maxWidth) {
 			var widthPerChar = inline.width / inline.text.length;
 			var maxChars = Math.floor(line.maxWidth / widthPerChar);
 			if (maxChars < 1) {
@@ -14637,7 +14651,7 @@ var qrEncoder = __webpack_require__(134);
  * @private
  */
 function DocMeasure(fontProvider, styleDictionary, defaultStyle, imageMeasure, tableLayouts, images) {
-	this.textTools = new TextTools(fontProvider);
+	this.textTools = new TextTools(fontProvider, this);
 	this.styleStack = new StyleContextStack(styleDictionary, defaultStyle);
 	this.imageMeasure = imageMeasure;
 	this.tableLayouts = tableLayouts;
@@ -17133,10 +17147,11 @@ TableProcessor.prototype.drawVerticalLine = function (x, y0, y1, vLineIndex, wri
 	if (width === 0) {
 		return;
 	}
+        var cx = x + width / 2;
 	writer.addVector({
 		type: 'line',
-		x1: x + width / 2,
-		x2: x + width / 2,
+		x1: cx,
+		x2: cx,
 		y1: y0,
 		y2: y1,
 		lineWidth: width,
@@ -50054,6 +50069,7 @@ function ImageMeasure(pdfKitDoc, imageDictionary) {
 ImageMeasure.prototype.measureImage = function (src) {
 	var image, label;
 	var that = this;
+	var scale = .75 // related to issue #328
 
 	if (!this.pdfKitDoc._imageRegistry[src]) {
 		label = 'I' + (++this.pdfKitDoc._imageCount);
@@ -50066,6 +50082,10 @@ ImageMeasure.prototype.measureImage = function (src) {
 			throw 'invalid image, images dictionary should contain dataURL entries (or local file paths in node.js)';
 		}
 		image.embed(this.pdfKitDoc);
+
+		image.width = image.width * scale
+		image.height = image.height * scale
+
 		this.pdfKitDoc._imageRegistry[src] = image;
 	} else {
 		image = this.pdfKitDoc._imageRegistry[src];
