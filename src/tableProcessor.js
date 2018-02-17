@@ -223,10 +223,11 @@ TableProcessor.prototype.drawVerticalLine = function (x, y0, y1, vLineIndex, wri
 	if (style && style.dash) {
 		dash = style.dash;
 	}
+        var cx = x + width / 2;
 	writer.addVector({
 		type: 'line',
-		x1: x + width / 2,
-		x2: x + width / 2,
+		x1: cx,
+		x2: cx,
 		y1: y0,
 		y2: y1,
 		lineWidth: width,
@@ -385,6 +386,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 	}
 
 	if (this.headerRepeatable && (rowIndex === (this.rowsWithoutPageBreak - 1) || rowIndex === this.tableNode.table.body.length - 1)) {
+		this.headerRepeatableHeight = this.headerRepeatable.height;
 		writer.commitUnbreakableBlock();
 		writer.pushToRepeatables(this.headerRepeatable);
 		this.cleanUpRepeatables = true;
