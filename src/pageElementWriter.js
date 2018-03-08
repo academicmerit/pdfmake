@@ -69,9 +69,9 @@ PageElementWriter.prototype.addFragment = function (fragment, useBlockXOffset, u
 	}
 };
 
-PageElementWriter.prototype.moveToNextPage = function (pageOrientation) {
+PageElementWriter.prototype.moveToNextPage = function (pageOrientation, resetPageCount) {
 
-	var nextPage = this.writer.context.moveToNextPage(pageOrientation);
+	var nextPage = this.writer.context.moveToNextPage(pageOrientation, resetPageCount);
 
 	// moveToNextPage is called multiple times for table, because is called for each column
 	// and repeatables are inserted only in the first time. If columns are used, is needed
