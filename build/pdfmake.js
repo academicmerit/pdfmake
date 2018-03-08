@@ -8242,6 +8242,8 @@ function DocumentContext(pageSize, pageMargins) {
 
 	this.snapshots = [];
 
+	this.breakpoints = [];
+
 	this.endingCell = null;
 
 	this.tracker = new TraversalTracker();
@@ -8437,7 +8439,7 @@ var getPageSize = function (currentPage, newPageOrientation) {
 };
 
 
-DocumentContext.prototype.moveToNextPage = function (pageOrientation) {
+DocumentContext.prototype.moveToNextPage = function (pageOrientation, resetPageCount) {
 	var nextPageIndex = this.page + 1;
 
 	var prevPage = this.page;
@@ -8450,6 +8452,8 @@ DocumentContext.prototype.moveToNextPage = function (pageOrientation) {
 
 		var pageSize = getPageSize(this.getCurrentPage(), pageOrientation);
 		this.addPage(pageSize);
+
+                if (resetPageCount) this.breakpoints.push(prevPage)
 
 		if (currentPageOrientation === pageSize.orientation) {
 			this.availableWidth = currentAvailableWidth;
@@ -13888,11 +13892,17 @@ LayoutBuilder.prototype.addStaticRepeatable = function (headerOrFooter, sizeFunc
 
 LayoutBuilder.prototype.addDynamicRepeatable = function (nodeGetter, sizeFunction) {
 	var pages = this.writer.context().pages;
+	var breakpoints = this.writer.context().breakpoints.slice();
+        var offset = 0
 
 	for (var pageIndex = 0, l = pages.length; pageIndex < l; pageIndex++) {
 		this.writer.context().page = pageIndex;
 
-		var node = nodeGetter(pageIndex + 1, l, this.writer.context().pages[pageIndex].pageSize);
+                var end = breakpoints[0] || l - 1
+                var total = end - offset + 1
+                var current = pageIndex - offset + 1
+
+		var node = nodeGetter(current, total, this.writer.context().pages[pageIndex].pageSize);
 
 		if (node) {
 			var sizes = sizeFunction(this.writer.context().getCurrentPage().pageSize, this.pageMargins);
@@ -13901,6 +13911,8 @@ LayoutBuilder.prototype.addDynamicRepeatable = function (nodeGetter, sizeFunctio
 			this.processNode(this.docMeasure.measureDocument(node));
 			this.writer.commitUnbreakableBlock(sizes.x, sizes.y);
 		}
+
+                if (pageIndex === breakpoints[0]) offset = breakpoints.shift() + 1
 	}
 };
 
@@ -14106,8 +14118,8 @@ LayoutBuilder.prototype.processNode = function (node) {
 			self.writer.context().moveDown(margin[3]);
 		}
 
-		if (node.pageBreak === 'after') {
-			self.writer.moveToNextPage(node.pageOrientation);
+		if (node.pageBreak && node.pageBreak.endsWith('after')) {
+			self.writer.moveToNextPage(node.pageOrientation, node.pageBreak.startsWith('reset'));
 		}
 	}
 };
@@ -16513,9 +16525,9 @@ PageElementWriter.prototype.addFragment = function (fragment, useBlockXOffset, u
 	}
 };
 
-PageElementWriter.prototype.moveToNextPage = function (pageOrientation) {
+PageElementWriter.prototype.moveToNextPage = function (pageOrientation, resetPageCount) {
 
-	var nextPage = this.writer.context.moveToNextPage(pageOrientation);
+	var nextPage = this.writer.context.moveToNextPage(pageOrientation, resetPageCount);
 
 	if (nextPage.newPageCreated) {
 		this.repeatables.forEach(function (rep) {
