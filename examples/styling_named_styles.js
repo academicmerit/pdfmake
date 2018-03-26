@@ -1,9 +1,9 @@
 var fonts = {
-	Roboto: {
-		normal: 'fonts/Roboto-Regular.ttf',
-		bold: 'fonts/Roboto-Medium.ttf',
-		italics: 'fonts/Roboto-Italic.ttf',
-		bolditalics: 'fonts/Roboto-MediumItalic.ttf'
+	FTFonts: {
+		normal: 'fonts/FTFonts-Regular.ttf',
+		bold: 'fonts/FTFonts-Medium.ttf',
+		italics: 'fonts/FTFonts-Italic.ttf',
+		bolditalics: 'fonts/FTFonts-MediumItalic.ttf'
 	}
 };
 

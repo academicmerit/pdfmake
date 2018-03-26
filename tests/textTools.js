@@ -123,7 +123,7 @@ describe('TextTools', function () {
 	var styleStack = new StyleContextStack({
 		header: {
 			fontSize: 150,
-			font: 'Roboto'
+			font: 'FTFonts'
 		},
 		small: {
 			fontSize: 8

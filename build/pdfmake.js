@@ -2630,7 +2630,7 @@ Stream.prototype.pipe = function(dest, options) {
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 /*<replacement>*/
@@ -2684,7 +2684,7 @@ function onend() {
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
-  processNextTick(onEndNT, this);
+  pna.nextTick(onEndNT, this);
 }
 
 function onEndNT(self) {
@@ -2716,7 +2716,7 @@ Duplex.prototype._destroy = function (err, cb) {
   this.push(null);
   this.end();
 
-  processNextTick(cb, err);
+  pna.nextTick(cb, err);
 };
 
 function forEach(xs, f) {
@@ -4061,7 +4061,7 @@ TextTools.prototype.sizeOfString = function (text, styleContextStack) {
 	text = text ? text.toString().replace(/\t/g, '    ') : '';
 
 	//TODO: refactor - extract from measure
-	var fontName = getStyleProperty({}, styleContextStack, 'font', 'Roboto');
+	var fontName = getStyleProperty({}, styleContextStack, 'font', 'FTFonts');
 	var fontSize = getStyleProperty({}, styleContextStack, 'fontSize', 12);
 	var fontFeatures = getStyleProperty({}, styleContextStack, 'fontFeatures', null);
 	var bold = getStyleProperty({}, styleContextStack, 'bold', false);
@@ -4228,7 +4228,7 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 	}
 
 	normalized.forEach(function (item) {
-		var fontName = getStyleProperty(item, styleContextStack, 'font', 'Roboto');
+		var fontName = getStyleProperty(item, styleContextStack, 'font', 'FTFonts');
 		var fontSize = getStyleProperty(item, styleContextStack, 'fontSize', 12);
 		var fontFeatures = getStyleProperty(item, styleContextStack, 'fontFeatures', null);
 		var bold = getStyleProperty(item, styleContextStack, 'bold', false);
@@ -4247,8 +4247,15 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 
 		var font = fontProvider.provideFont(fontName, bold, italics);
 
-                if (item.image) {
-			docMeasure.measureImage(item)
+        if (item.image) {
+			if (!item.width) {
+				item.trailingCut = 0;
+			}
+			item.noWrap = item.noWrap || false;
+			var dimensions;
+			docMeasure.measureImage(item);
+			item.lineHeight = (dimensions.height / 2);
+			docMeasure.measureImage(item, [1,(item.height / 4),1,-(item.height/4)]);
 		} else {
 			item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
 			item.height = font.lineHeight(fontSize) * lineHeight;
@@ -4583,7 +4590,7 @@ exports.PassThrough = __webpack_require__(145);
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 module.exports = Writable;
@@ -4610,7 +4617,7 @@ function CorkedRequest(state) {
 /* </replacement> */
 
 /*<replacement>*/
-var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
 /*</replacement>*/
 
 /*<replacement>*/
@@ -4844,7 +4851,7 @@ function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
   // TODO: defer error events consistently everywhere, not just the cb
   stream.emit('error', er);
-  processNextTick(cb, er);
+  pna.nextTick(cb, er);
 }
 
 // Checks that a user-supplied chunk is valid, especially for the particular
@@ -4861,7 +4868,7 @@ function validChunk(stream, state, chunk, cb) {
   }
   if (er) {
     stream.emit('error', er);
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     valid = false;
   }
   return valid;
@@ -4981,10 +4988,10 @@ function onwriteError(stream, state, sync, er, cb) {
   if (sync) {
     // defer the callback if we are being called synchronously
     // to avoid piling up things on the stack
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     // this can emit finish, and it will always happen
     // after error
-    processNextTick(finishMaybe, stream, state);
+    pna.nextTick(finishMaybe, stream, state);
     stream._writableState.errorEmitted = true;
     stream.emit('error', er);
   } else {
@@ -5159,7 +5166,7 @@ function prefinish(stream, state) {
     if (typeof stream._final === 'function') {
       state.pendingcb++;
       state.finalCalled = true;
-      processNextTick(callFinal, stream, state);
+      pna.nextTick(callFinal, stream, state);
     } else {
       state.prefinished = true;
       stream.emit('prefinish');
@@ -5183,7 +5190,7 @@ function endWritable(stream, state, cb) {
   state.ending = true;
   finishMaybe(stream, state);
   if (cb) {
-    if (state.finished) processNextTick(cb);else stream.once('finish', cb);
+    if (state.finished) pna.nextTick(cb);else stream.once('finish', cb);
   }
   state.ended = true;
   stream.writable = false;
@@ -8636,7 +8643,7 @@ module.exports = Line;
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 module.exports = Readable;
@@ -9108,7 +9115,7 @@ function emitReadable(stream) {
   if (!state.emittedReadable) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
-    if (state.sync) processNextTick(emitReadable_, stream);else emitReadable_(stream);
+    if (state.sync) pna.nextTick(emitReadable_, stream);else emitReadable_(stream);
   }
 }
 
@@ -9127,7 +9134,7 @@ function emitReadable_(stream) {
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
-    processNextTick(maybeReadMore_, stream, state);
+    pna.nextTick(maybeReadMore_, stream, state);
   }
 }
 
@@ -9172,7 +9179,7 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
   var doEnd = (!pipeOpts || pipeOpts.end !== false) && dest !== process.stdout && dest !== process.stderr;
 
   var endFn = doEnd ? onend : unpipe;
-  if (state.endEmitted) processNextTick(endFn);else src.once('end', endFn);
+  if (state.endEmitted) pna.nextTick(endFn);else src.once('end', endFn);
 
   dest.on('unpipe', onunpipe);
   function onunpipe(readable, unpipeInfo) {
@@ -9362,7 +9369,7 @@ Readable.prototype.on = function (ev, fn) {
       state.readableListening = state.needReadable = true;
       state.emittedReadable = false;
       if (!state.reading) {
-        processNextTick(nReadingNextTick, this);
+        pna.nextTick(nReadingNextTick, this);
       } else if (state.length) {
         emitReadable(this);
       }
@@ -9393,7 +9400,7 @@ Readable.prototype.resume = function () {
 function resume(stream, state) {
   if (!state.resumeScheduled) {
     state.resumeScheduled = true;
-    processNextTick(resume_, stream, state);
+    pna.nextTick(resume_, stream, state);
   }
 }
 
@@ -9601,7 +9608,7 @@ function endReadable(stream) {
 
   if (!state.endEmitted) {
     state.ended = true;
-    processNextTick(endReadableNT, state, stream);
+    pna.nextTick(endReadableNT, state, stream);
   }
 }
 
@@ -9644,7 +9651,7 @@ module.exports = __webpack_require__(31).EventEmitter;
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 // undocumented cb() API, needed for core, not for public API
@@ -9658,7 +9665,7 @@ function destroy(err, cb) {
     if (cb) {
       cb(err);
     } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
-      processNextTick(emitErrorNT, this, err);
+      pna.nextTick(emitErrorNT, this, err);
     }
     return this;
   }
@@ -9677,7 +9684,7 @@ function destroy(err, cb) {
 
   this._destroy(err || null, function (err) {
     if (!cb && err) {
-      processNextTick(emitErrorNT, _this, err);
+      pna.nextTick(emitErrorNT, _this, err);
       if (_this._writableState) {
         _this._writableState.errorEmitted = true;
       }
@@ -12686,11 +12693,11 @@ var FileSaver = __webpack_require__(306);
 var saveAs = FileSaver.saveAs;
 
 var defaultClientFonts = {
-	Roboto: {
-		normal: 'Roboto-Regular.ttf',
-		bold: 'Roboto-Medium.ttf',
-		italics: 'Roboto-Italic.ttf',
-		bolditalics: 'Roboto-MediumItalic.ttf'
+	FTFonts: {
+		normal: 'FTFonts-Regular.ttf',
+		bold: 'FTFonts-Medium.ttf',
+		italics: 'FTFonts-Italic.ttf',
+		bolditalics: 'FTFonts-MediumItalic.ttf'
 	}
 };
 
@@ -13001,7 +13008,7 @@ function fromByteArray (uint8) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
-  var eLen = nBytes * 8 - mLen - 1
+  var eLen = (nBytes * 8) - mLen - 1
   var eMax = (1 << eLen) - 1
   var eBias = eMax >> 1
   var nBits = -7
@@ -13014,12 +13021,12 @@ exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   e = s & ((1 << (-nBits)) - 1)
   s >>= (-nBits)
   nBits += eLen
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
   m = e & ((1 << (-nBits)) - 1)
   e >>= (-nBits)
   nBits += mLen
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
     e = 1 - eBias
@@ -13034,7 +13041,7 @@ exports.read = function (buffer, offset, isLE, mLen, nBytes) {
 
 exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   var e, m, c
-  var eLen = nBytes * 8 - mLen - 1
+  var eLen = (nBytes * 8) - mLen - 1
   var eMax = (1 << eLen) - 1
   var eBias = eMax >> 1
   var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
@@ -13067,7 +13074,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       m = 0
       e = eMax
     } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen)
+      m = ((value * c) - 1) * Math.pow(2, mLen)
       e = e + eBias
     } else {
       m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
@@ -13116,11 +13123,11 @@ var isArray = __webpack_require__(0).isArray;
  *
  * @example
  * var fontDescriptors = {
- *	Roboto: {
- *		normal: 'fonts/Roboto-Regular.ttf',
- *		bold: 'fonts/Roboto-Medium.ttf',
- *		italics: 'fonts/Roboto-Italic.ttf',
- *		bolditalics: 'fonts/Roboto-MediumItalic.ttf'
+ *	FTFonts: {
+ *		normal: 'fonts/FTFonts-Regular.ttf',
+ *		bold: 'fonts/FTFonts-Medium.ttf',
+ *		italics: 'fonts/FTFonts-Italic.ttf',
+ *		bolditalics: 'fonts/FTFonts-MediumItalic.ttf'
  *	}
  * };
  *
@@ -13193,7 +13200,7 @@ PdfPrinter.prototype.createPdfKitDocument = function (docDefinition, options) {
 		builder.registerTableLayouts(options.tableLayouts);
 	}
 
-	var pages = builder.layoutDocument(docDefinition.content, this.fontProvider, docDefinition.styles || {}, docDefinition.defaultStyle || {fontSize: 12, font: 'Roboto'}, docDefinition.background, docDefinition.header, docDefinition.footer, docDefinition.images, docDefinition.watermark, docDefinition.pageBreakBefore);
+	var pages = builder.layoutDocument(docDefinition.content, this.fontProvider, docDefinition.styles || {}, docDefinition.defaultStyle || {fontSize: 12, font: 'FTFonts'}, docDefinition.background, docDefinition.header, docDefinition.footer, docDefinition.images, docDefinition.watermark, docDefinition.pageBreakBefore);
 	var maxNumberPages = docDefinition.maxPagesNumber || -1;
 	if (isNumber(maxNumberPages) && maxNumberPages > -1) {
 		pages = pages.slice(0, maxNumberPages);
@@ -13639,7 +13646,7 @@ var isArray = __webpack_require__(0).isArray;
 function typeName(bold, italics) {
 	var type = 'normal';
 	if (bold && italics) {
-		type = 'bolditalics';
+		type = 'bolditalic';
 	} else if (bold) {
 		type = 'bold';
 	} else if (italics) {
@@ -13945,7 +13952,7 @@ LayoutBuilder.prototype.addWatermark = function (watermark, fontProvider, defaul
 		return;
 	}
 
-	watermark.font = watermark.font || defaultStyle.font || 'Roboto';
+	watermark.font = watermark.font || defaultStyle.font || 'FTFonts';
 	watermark.color = watermark.color || 'black';
 	watermark.opacity = watermark.opacity || 0.6;
 	watermark.bold = watermark.bold || false;
@@ -14789,43 +14796,48 @@ DocMeasure.prototype.convertIfBase64Image = function (node) {
 	}
 };
 
-DocMeasure.prototype.measureImage = function (node) {
+DocMeasure.prototype.measureImage = function (node, margins) {
 	if (this.images) {
 		this.convertIfBase64Image(node);
 	}
 
 	var imageSize = this.imageMeasure.measureImage(node.image);
 
-	if (node.fit) {
-		var factor = (imageSize.width / imageSize.height > node.fit[0] / node.fit[1]) ? node.fit[0] / imageSize.width : node.fit[1] / imageSize.height;
-		node._width = node._minWidth = node._maxWidth = imageSize.width * factor;
-		node._height = imageSize.height * factor;
-	} else {
-		node._width = node._minWidth = node._maxWidth = node.width || imageSize.width;
-		node._height = node.height || (imageSize.height * node._width / imageSize.width);
+	var determineDimensions = function(node) {
+		if (node.fit) {
+			var factor = (imageSize.width / imageSize.height > node.fit[0] / node.fit[1]) ? node.fit[0] / imageSize.width : node.fit[1] / imageSize.height;
+			node._width = node._minWidth = node._maxWidth = imageSize.width * factor;
+			node._height = imageSize.height * factor;
+		} else {
+			node._width = node._minWidth = node._maxWidth = node.width || imageSize.width;
+			node._height = node.height || (imageSize.height * node._width / imageSize.width);
 
-		if (isNumber(node.maxWidth) && node.maxWidth < node._width) {
-			node._width = node._minWidth = node._maxWidth = node.maxWidth;
-			node._height = node._width * imageSize.height / imageSize.width;
-		}
+			if (isNumber(node.maxWidth) && node.maxWidth < node._width) {
+				node._width = node._minWidth = node._maxWidth = node.maxWidth;
+				node._height = node._width * imageSize.height / imageSize.width;
+			}
 
-		if (isNumber(node.maxHeight) && node.maxHeight < node._height) {
-			node._height = node.maxHeight;
-			node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
-		}
+			if (isNumber(node.maxHeight) && node.maxHeight < node._height) {
+				node._height = node.maxHeight;
+				node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
+			}
 
-		if (isNumber(node.minWidth) && node.minWidth > node._width) {
-			node._width = node._minWidth = node._maxWidth = node.minWidth;
-			node._height = node._width * imageSize.height / imageSize.width;
-		}
+			if (isNumber(node.minWidth) && node.minWidth > node._width) {
+				node._width = node._minWidth = node._maxWidth = node.minWidth;
+				node._height = node._width * imageSize.height / imageSize.width;
+			}
 
-		if (isNumber(node.minHeight) && node.minHeight > node._height) {
-			node._height = node.minHeight;
-			node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
+			if (isNumber(node.minHeight) && node.minHeight > node._height) {
+				node._height = node.minHeight;
+				node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
+			}
 		}
-	}
+	};
 
 	node._alignment = this.styleStack.getProperty('alignment');
+	if (margins) {
+		node.margin = margins;
+	}
 	return node;
 };
 
@@ -46848,7 +46860,13 @@ function clone(parent, circular, depth, prototype) {
     } else if (clone.__isDate(parent)) {
       child = new Date(parent.getTime());
     } else if (useBuffer && Buffer.isBuffer(parent)) {
-      child = new Buffer(parent.length);
+      if (Buffer.allocUnsafe) {
+        // Node.js >= 4.5.0
+        child = Buffer.allocUnsafe(parent.length);
+      } else {
+        // Older Node.js versions
+        child = new Buffer(parent.length);
+      }
       parent.copy(child);
       return child;
     } else {
@@ -50069,7 +50087,6 @@ function ImageMeasure(pdfKitDoc, imageDictionary) {
 ImageMeasure.prototype.measureImage = function (src) {
 	var image, label;
 	var that = this;
-	var scale = .75 // related to issue #328
 
 	if (!this.pdfKitDoc._imageRegistry[src]) {
 		label = 'I' + (++this.pdfKitDoc._imageCount);
@@ -50082,10 +50099,6 @@ ImageMeasure.prototype.measureImage = function (src) {
 			throw 'invalid image, images dictionary should contain dataURL entries (or local file paths in node.js)';
 		}
 		image.embed(this.pdfKitDoc);
-
-		image.width = image.width * scale
-		image.height = image.height * scale
-
 		this.pdfKitDoc._imageRegistry[src] = image;
 	} else {
 		image = this.pdfKitDoc._imageRegistry[src];
@@ -50110,7 +50123,6 @@ ImageMeasure.prototype.measureImage = function (src) {
 };
 
 module.exports = ImageMeasure;
-
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1).Buffer))
 
 /***/ }),
@@ -50274,60 +50286,73 @@ module.exports = {
 /* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_RESULT__;/* FileSaver.js
- * A saveAs() FileSaver implementation.
- * 1.3.2
- * 2016-06-16 18:25:19
- *
- * By Eli Grey, http://eligrey.com
- * License: MIT
- *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
- */
-
-/*global self */
-/*jslint bitwise: true, indent: 4, laxbreak: true, laxcomma: true, smarttabs: true, plusplus: true */
-
-/*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
-
-var saveAs = saveAs || (function(view) {
-	"use strict";
-	// IE <10 is explicitly unsupported
-	if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
-		return;
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	if (true) {
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else if (typeof exports !== "undefined") {
+		factory(exports);
+	} else {
+		var mod = {
+			exports: {}
+		};
+		factory(mod.exports);
+		global.FileSaver = mod.exports;
 	}
-	var
-		  doc = view.document
-		  // only get URL when necessary in case Blob.js hasn't overridden it yet
-		, get_URL = function() {
-			return view.URL || view.webkitURL || view;
+})(this, function (exports) {
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	exports.default = window.saveAs || function (view) {
+		"use strict";
+		// IE <10 is explicitly unsupported
+
+		if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
+			return;
 		}
-		, save_link = doc ? doc.createElementNS("http://www.w3.org/1999/xhtml", "a") : []
-		, can_use_save_link = "download" in save_link
-		, click = function(node) {
+		var doc = view.document
+		// only get URL when necessary in case Blob.js hasn't overridden it yet
+		,
+		    get_URL = function get_URL() {
+			return view.URL || view.webkitURL || view;
+		},
+		    save_link = doc ? doc.createElementNS("http://www.w3.org/1999/xhtml", "a") : [],
+		    can_use_save_link = "download" in save_link,
+		    click = function click(node) {
 			var event = new MouseEvent("click");
 			node.dispatchEvent(event);
-		}
-		, is_safari = /constructor/i.test(view.HTMLElement) || view.safari
-		, is_chrome_ios =/CriOS\/[\d]+/.test(navigator.userAgent)
-		, throw_outside = function(ex) {
-			(view.setImmediate || view.setTimeout)(function() {
+		},
+		    is_safari = /constructor/i.test(view.HTMLElement) || view.safari,
+		    is_chrome_ios = /CriOS\/[\d]+/.test(navigator.userAgent),
+		    setImmediate = view.setImmediate || view.setTimeout,
+		    throw_outside = function throw_outside(ex) {
+			setImmediate(function () {
 				throw ex;
 			}, 0);
-		}
-		, force_saveable_type = "application/octet-stream"
+		},
+		    force_saveable_type = "application/octet-stream"
 		// the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
-		, arbitrary_revoke_timeout = 1000 * 40 // in ms
-		, revoke = function(file) {
-			var revoker = function() {
-				if (typeof file === "string") { // file is an object URL
+		,
+		    arbitrary_revoke_timeout = 1000 * 40 // in ms
+		,
+		    revoke = function revoke(file) {
+			var revoker = function revoker() {
+				if (typeof file === "string") {
+					// file is an object URL
 					get_URL().revokeObjectURL(file);
-				} else { // file is a File
+				} else {
+					// file is a File
 					file.remove();
 				}
 			};
 			setTimeout(revoker, arbitrary_revoke_timeout);
-		}
-		, dispatch = function(filesaver, event_types, event) {
+		},
+		    dispatch = function dispatch(filesaver, event_types, event) {
 			event_types = [].concat(event_types);
 			var i = event_types.length;
 			while (i--) {
@@ -50340,148 +50365,109 @@ var saveAs = saveAs || (function(view) {
 					}
 				}
 			}
-		}
-		, auto_bom = function(blob) {
+		},
+		    auto_bom = function auto_bom(blob) {
 			// prepend BOM for UTF-8 XML and text/* types (including HTML)
 			// note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
 			if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-				return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
+				return new Blob([String.fromCharCode(0xFEFF), blob], { type: blob.type });
 			}
 			return blob;
-		}
-		, FileSaver = function(blob, name, no_auto_bom) {
+		},
+		    FileSaver = function FileSaver(blob, name, no_auto_bom) {
 			if (!no_auto_bom) {
 				blob = auto_bom(blob);
 			}
 			// First try a.download, then web filesystem, then object URLs
-			var
-				  filesaver = this
-				, type = blob.type
-				, force = type === force_saveable_type
-				, object_url
-				, dispatch_all = function() {
-					dispatch(filesaver, "writestart progress write writeend".split(" "));
+			var filesaver = this,
+			    type = blob.type,
+			    force = type === force_saveable_type,
+			    object_url,
+			    dispatch_all = function dispatch_all() {
+				dispatch(filesaver, "writestart progress write writeend".split(" "));
+			}
+			// on any filesys errors revert to saving with object URLs
+			,
+			    fs_error = function fs_error() {
+				if ((is_chrome_ios || force && is_safari) && view.FileReader) {
+					// Safari doesn't allow downloading of blob urls
+					var reader = new FileReader();
+					reader.onloadend = function () {
+						var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
+						var popup = view.open(url, '_blank');
+						if (!popup) view.location.href = url;
+						url = undefined; // release reference before dispatching
+						filesaver.readyState = filesaver.DONE;
+						dispatch_all();
+					};
+					reader.readAsDataURL(blob);
+					filesaver.readyState = filesaver.INIT;
+					return;
 				}
-				// on any filesys errors revert to saving with object URLs
-				, fs_error = function() {
-					if ((is_chrome_ios || (force && is_safari)) && view.FileReader) {
-						// Safari doesn't allow downloading of blob urls
-						var reader = new FileReader();
-						reader.onloadend = function() {
-							var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
-							var popup = view.open(url, '_blank');
-							if(!popup) view.location.href = url;
-							url=undefined; // release reference before dispatching
-							filesaver.readyState = filesaver.DONE;
-							dispatch_all();
-						};
-						reader.readAsDataURL(blob);
-						filesaver.readyState = filesaver.INIT;
-						return;
-					}
-					// don't create more object URLs than needed
-					if (!object_url) {
-						object_url = get_URL().createObjectURL(blob);
-					}
-					if (force) {
+				// don't create more object URLs than needed
+				if (!object_url) {
+					object_url = get_URL().createObjectURL(blob);
+				}
+				if (force) {
+					view.location.href = object_url;
+				} else {
+					var opened = view.open(object_url, "_blank");
+					if (!opened) {
+						// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
 						view.location.href = object_url;
-					} else {
-						var opened = view.open(object_url, "_blank");
-						if (!opened) {
-							// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
-							view.location.href = object_url;
-						}
 					}
-					filesaver.readyState = filesaver.DONE;
-					dispatch_all();
-					revoke(object_url);
 				}
-			;
+				filesaver.readyState = filesaver.DONE;
+				dispatch_all();
+				revoke(object_url);
+			};
 			filesaver.readyState = filesaver.INIT;
 
 			if (can_use_save_link) {
 				object_url = get_URL().createObjectURL(blob);
-				setTimeout(function() {
+				setImmediate(function () {
 					save_link.href = object_url;
 					save_link.download = name;
 					click(save_link);
 					dispatch_all();
 					revoke(object_url);
 					filesaver.readyState = filesaver.DONE;
-				});
+				}, 0);
 				return;
 			}
 
 			fs_error();
-		}
-		, FS_proto = FileSaver.prototype
-		, saveAs = function(blob, name, no_auto_bom) {
+		},
+		    FS_proto = FileSaver.prototype,
+		    saveAs = function saveAs(blob, name, no_auto_bom) {
 			return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
-		}
-	;
-	// IE 10+ (native saveAs)
-	if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
-		return function(blob, name, no_auto_bom) {
-			name = name || blob.name || "download";
-
-			if (!no_auto_bom) {
-				blob = auto_bom(blob);
-			}
-			return navigator.msSaveOrOpenBlob(blob, name);
 		};
-	}
 
-	FS_proto.abort = function(){};
-	FS_proto.readyState = FS_proto.INIT = 0;
-	FS_proto.WRITING = 1;
-	FS_proto.DONE = 2;
+		// IE 10+ (native saveAs)
+		if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
+			return function (blob, name, no_auto_bom) {
+				name = name || blob.name || "download";
 
-	FS_proto.error =
-	FS_proto.onwritestart =
-	FS_proto.onprogress =
-	FS_proto.onwrite =
-	FS_proto.onabort =
-	FS_proto.onerror =
-	FS_proto.onwriteend =
-		null;
+				if (!no_auto_bom) {
+					blob = auto_bom(blob);
+				}
+				return navigator.msSaveOrOpenBlob(blob, name);
+			};
+		}
 
-	return saveAs;
-}(
-	   typeof self !== "undefined" && self
-	|| typeof window !== "undefined" && window
-	|| this.content
-));
-// `self` is undefined in Firefox for Android content script context
-// while `this` is nsIContentFrameMessageManager
-// with an attribute `content` that corresponds to the window
+		save_link.target = "_blank";
 
-if (typeof module !== "undefined" && module.exports) {
-  module.exports.saveAs = saveAs;
-} else if (("function" !== "undefined" && __webpack_require__(307) !== null) && (__webpack_require__(308) !== null)) {
-  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() {
-    return saveAs;
-  }).call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-}
+		FS_proto.abort = function () {};
+		FS_proto.readyState = FS_proto.INIT = 0;
+		FS_proto.WRITING = 1;
+		FS_proto.DONE = 2;
 
+		FS_proto.error = FS_proto.onwritestart = FS_proto.onprogress = FS_proto.onwrite = FS_proto.onabort = FS_proto.onerror = FS_proto.onwriteend = null;
 
-/***/ }),
-/* 307 */
-/***/ (function(module, exports) {
+		return saveAs;
+	}(typeof self !== "undefined" && self || typeof window !== "undefined" && window || undefined);
+});
 
-module.exports = function() {
-	throw new Error("define cannot be used indirect");
-};
-
-
-/***/ }),
-/* 308 */
-/***/ (function(module, exports) {
-
-/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
-module.exports = __webpack_amd_options__;
-
-/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ })
 /******/ ]);

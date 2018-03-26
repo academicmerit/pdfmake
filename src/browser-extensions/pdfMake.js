@@ -6,11 +6,11 @@ var FileSaver = require('file-saver');
 var saveAs = FileSaver.saveAs;
 
 var defaultClientFonts = {
-	Roboto: {
-		normal: 'Roboto-Regular.ttf',
-		bold: 'Roboto-Medium.ttf',
-		italics: 'Roboto-Italic.ttf',
-		bolditalics: 'Roboto-MediumItalic.ttf'
+	FTFonts: {
+		normal: 'FTFonts-Regular.ttf',
+		bold: 'FTFonts-Medium.ttf',
+		italics: 'FTFonts-Italic.ttf',
+		bolditalics: 'FTFonts-MediumItalic.ttf'
 	}
 };
 

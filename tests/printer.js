@@ -13,8 +13,8 @@ describe('Printer', function () {
 
 	beforeEach(function () {
 		fontDescriptors = {
-			Roboto: {
-				normal: 'tests/fonts/Roboto-Regular.ttf'
+			FTFonts: {
+				normal: 'tests/fonts/FTFonts-Regular.ttf'
 			}
 		};
 		Pdfkit.prototype.addPage = sinon.spy(Pdfkit.prototype.addPage);

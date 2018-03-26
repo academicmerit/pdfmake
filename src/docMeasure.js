@@ -155,43 +155,48 @@ DocMeasure.prototype.convertIfBase64Image = function (node) {
 	}
 };
 
-DocMeasure.prototype.measureImage = function (node) {
+DocMeasure.prototype.measureImage = function (node, margins) {
 	if (this.images) {
 		this.convertIfBase64Image(node);
 	}
 
 	var imageSize = this.imageMeasure.measureImage(node.image);
 
-	if (node.fit) {
-		var factor = (imageSize.width / imageSize.height > node.fit[0] / node.fit[1]) ? node.fit[0] / imageSize.width : node.fit[1] / imageSize.height;
-		node._width = node._minWidth = node._maxWidth = imageSize.width * factor;
-		node._height = imageSize.height * factor;
-	} else {
-		node._width = node._minWidth = node._maxWidth = node.width || imageSize.width;
-		node._height = node.height || (imageSize.height * node._width / imageSize.width);
+	var determineDimensions = function(node) {
+		if (node.fit) {
+			var factor = (imageSize.width / imageSize.height > node.fit[0] / node.fit[1]) ? node.fit[0] / imageSize.width : node.fit[1] / imageSize.height;
+			node._width = node._minWidth = node._maxWidth = imageSize.width * factor;
+			node._height = imageSize.height * factor;
+		} else {
+			node._width = node._minWidth = node._maxWidth = node.width || imageSize.width;
+			node._height = node.height || (imageSize.height * node._width / imageSize.width);
 
-		if (isNumber(node.maxWidth) && node.maxWidth < node._width) {
-			node._width = node._minWidth = node._maxWidth = node.maxWidth;
-			node._height = node._width * imageSize.height / imageSize.width;
-		}
+			if (isNumber(node.maxWidth) && node.maxWidth < node._width) {
+				node._width = node._minWidth = node._maxWidth = node.maxWidth;
+				node._height = node._width * imageSize.height / imageSize.width;
+			}
 
-		if (isNumber(node.maxHeight) && node.maxHeight < node._height) {
-			node._height = node.maxHeight;
-			node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
-		}
+			if (isNumber(node.maxHeight) && node.maxHeight < node._height) {
+				node._height = node.maxHeight;
+				node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
+			}
 
-		if (isNumber(node.minWidth) && node.minWidth > node._width) {
-			node._width = node._minWidth = node._maxWidth = node.minWidth;
-			node._height = node._width * imageSize.height / imageSize.width;
-		}
+			if (isNumber(node.minWidth) && node.minWidth > node._width) {
+				node._width = node._minWidth = node._maxWidth = node.minWidth;
+				node._height = node._width * imageSize.height / imageSize.width;
+			}
 
-		if (isNumber(node.minHeight) && node.minHeight > node._height) {
-			node._height = node.minHeight;
-			node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
+			if (isNumber(node.minHeight) && node.minHeight > node._height) {
+				node._height = node.minHeight;
+				node._width = node._minWidth = node._maxWidth = node._height * imageSize.width / imageSize.height;
+			}
 		}
-	}
+	};
 
 	node._alignment = this.styleStack.getProperty('alignment');
+	if (margins) {
+		node.margin = margins;
+	}
 	return node;
 };
 

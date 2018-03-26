@@ -16,11 +16,11 @@ IntegrationTestHelper.prototype.renderPages = function (sizeName, docDefinition)
 	var size = sizes[sizeName];
 	docDefinition.images = docDefinition.images || {};
 	var fontDescriptors = {
-		Roboto: {
-			normal: 'tests/fonts/Roboto-Regular.ttf',
-			bold: 'tests/fonts/Roboto-Medium.ttf',
-			italics: 'tests/fonts/Roboto-Italic.ttf',
-			bolditalics: 'tests/fonts/Roboto-Italic.ttf'
+		FTFonts: {
+			normal: 'tests/fonts/FTFonts-Regular.ttf',
+			bold: 'tests/fonts/FTFonts-Medium.ttf',
+			italics: 'tests/fonts/FTFonts-Italic.ttf',
+			bolditalics: 'tests/fonts/FTFonts-Italic.ttf'
 		}
 	};
 
@@ -37,7 +37,7 @@ IntegrationTestHelper.prototype.renderPages = function (sizeName, docDefinition)
 	return builder.layoutDocument(
 		docDefinition.content,
 		this.fontProvider, docDefinition.styles || {},
-		docDefinition.defaultStyle || {fontSize: 12, font: 'Roboto'},
+		docDefinition.defaultStyle || {fontSize: 12, font: 'FTFonts'},
 		docDefinition.background,
 		docDefinition.header,
 		docDefinition.footer,
@@ -52,7 +52,7 @@ IntegrationTestHelper.prototype.getInlineTexts = function (pages, options) {
 };
 
 IntegrationTestHelper.prototype.getWidthOfString = function (inlines) {
-	return this.fontProvider.fontCache['Roboto'].normal.widthOfString(inlines, 12);
+	return this.fontProvider.fontCache['FTFonts'].normal.widthOfString(inlines, 12);
 };
 
 

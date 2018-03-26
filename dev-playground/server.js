@@ -17,11 +17,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 function createPdfBinary(pdfDoc, callback) {
 
   var fontDescriptors = {
-    Roboto: {
-      normal: path.join(__dirname, '..', 'examples', '/fonts/Roboto-Regular.ttf'),
-      bold: path.join(__dirname, '..', 'examples', '/fonts/Roboto-Medium.ttf'),
-      italics: path.join(__dirname, '..', 'examples', '/fonts/Roboto-Italic.ttf'),
-      bolditalics: path.join(__dirname, '..', 'examples', '/fonts/Roboto-MediumItalic.ttf')
+    FTFonts: {
+      normal: path.join(__dirname, '..', 'examples', '/fonts/regular.ttf'),
+      bold: path.join(__dirname, '..', 'examples', '/fonts/bold.ttf'),
+      italics: path.join(__dirname, '..', 'examples', '/fonts/italic.ttf'),
+      bolditalics: path.join(__dirname, '..', 'examples', '/fonts/bolditalic.ttf')
     }
   };
 

@@ -5,7 +5,7 @@ var isArray = require('./helpers').isArray;
 function typeName(bold, italics) {
 	var type = 'normal';
 	if (bold && italics) {
-		type = 'bolditalics';
+		type = 'bolditalic';
 	} else if (bold) {
 		type = 'bold';
 	} else if (italics) {

@@ -249,7 +249,7 @@ LayoutBuilder.prototype.addWatermark = function (watermark, fontProvider, defaul
 		return;
 	}
 
-	watermark.font = watermark.font || defaultStyle.font || 'Roboto';
+	watermark.font = watermark.font || defaultStyle.font || 'FTFonts';
 	watermark.color = watermark.color || 'black';
 	watermark.opacity = watermark.opacity || 0.6;
 	watermark.bold = watermark.bold || false;

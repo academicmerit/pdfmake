@@ -31,7 +31,7 @@ describe('StyleContextStack', function () {
 			{
 				header: {
 					fontSize: 150,
-					font: 'Roboto'
+					font: 'FTFonts'
 				},
 				small: {
 					fontSize: 8
@@ -100,7 +100,7 @@ describe('StyleContextStack', function () {
 			assert.equal(fullStack.getProperty('fontSize'), 8);
 
 			// taken from previous overrides (not found in latest overrides)
-			assert.equal(fullStack.getProperty('font'), 'Roboto');
+			assert.equal(fullStack.getProperty('font'), 'FTFonts');
 		});
 
 		it('"false" boolean overrides (bold, italics, etc) should override inherited "true" values', function () {
