@@ -10,7 +10,6 @@ function ImageMeasure(pdfKitDoc, imageDictionary) {
 ImageMeasure.prototype.measureImage = function (src) {
 	var image, label;
 	var that = this;
-	var scale = .75 // related to issue #328
 
 	if (!this.pdfKitDoc._imageRegistry[src]) {
 		label = 'I' + (++this.pdfKitDoc._imageCount);
@@ -23,10 +22,6 @@ ImageMeasure.prototype.measureImage = function (src) {
 			throw 'invalid image, images dictionary should contain dataURL entries (or local file paths in node.js)';
 		}
 		image.embed(this.pdfKitDoc);
-
-		image.width = image.width * scale
-		image.height = image.height * scale
-
 		this.pdfKitDoc._imageRegistry[src] = image;
 	} else {
 		image = this.pdfKitDoc._imageRegistry[src];

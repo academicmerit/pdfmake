@@ -77,7 +77,7 @@ TextTools.prototype.sizeOfString = function (text, styleContextStack) {
 	text = text ? text.toString().replace(/\t/g, '    ') : '';
 
 	//TODO: refactor - extract from measure
-	var fontName = getStyleProperty({}, styleContextStack, 'font', 'Roboto');
+	var fontName = getStyleProperty({}, styleContextStack, 'font', 'FTFonts');
 	var fontSize = getStyleProperty({}, styleContextStack, 'fontSize', 12);
 	var fontFeatures = getStyleProperty({}, styleContextStack, 'fontFeatures', null);
 	var bold = getStyleProperty({}, styleContextStack, 'bold', false);
@@ -243,8 +243,8 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 		}
 	}
 
-	normalized.forEach(function (item) {
-		var fontName = getStyleProperty(item, styleContextStack, 'font', 'Roboto');
+	normalized.forEach(function (item, index) {
+		var fontName = getStyleProperty(item, styleContextStack, 'font', 'FTFonts');
 		var fontSize = getStyleProperty(item, styleContextStack, 'fontSize', 12);
 		var fontFeatures = getStyleProperty(item, styleContextStack, 'fontFeatures', null);
 		var bold = getStyleProperty(item, styleContextStack, 'bold', false);
@@ -263,8 +263,9 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 
 		var font = fontProvider.provideFont(fontName, bold, italics);
 
-                if (item.image) {
-			docMeasure.measureImage(item)
+        if (item.image) {
+			docMeasure.measureImage(item);
+			item.height = item._height;
 		} else {
 			item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
 			item.height = font.lineHeight(fontSize) * lineHeight;
