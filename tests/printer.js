@@ -14,7 +14,7 @@ describe('Printer', function () {
 	beforeEach(function () {
 		fontDescriptors = {
 			FTFonts: {
-				normal: 'tests/fonts/FTFonts-Regular.ttf'
+				normal: 'tests/fonts/regular.ttf'
 			}
 		};
 		Pdfkit.prototype.addPage = sinon.spy(Pdfkit.prototype.addPage);

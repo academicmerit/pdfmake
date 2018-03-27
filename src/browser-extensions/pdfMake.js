@@ -7,10 +7,10 @@ var saveAs = FileSaver.saveAs;
 
 var defaultClientFonts = {
 	FTFonts: {
-		normal: 'FTFonts-Regular.ttf',
-		bold: 'FTFonts-Medium.ttf',
-		italics: 'FTFonts-Italic.ttf',
-		bolditalics: 'FTFonts-MediumItalic.ttf'
+		normal: 'regular.ttf',
+		bold: 'bold.ttf',
+		italics: 'italic.ttf',
+		bolditalics: 'bolditalic.ttf'
 	}
 };
 

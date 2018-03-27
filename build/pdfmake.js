@@ -12688,10 +12688,10 @@ var saveAs = FileSaver.saveAs;
 
 var defaultClientFonts = {
 	FTFonts: {
-		normal: 'FTFonts-Regular.ttf',
-		bold: 'FTFonts-Medium.ttf',
-		italics: 'FTFonts-Italic.ttf',
-		bolditalics: 'FTFonts-MediumItalic.ttf'
+		normal: 'regular.ttf',
+		bold: 'bold.ttf',
+		italics: 'italic.ttf',
+		bolditalics: 'bolditalic.ttf'
 	}
 };
 
@@ -13118,10 +13118,10 @@ var isArray = __webpack_require__(0).isArray;
  * @example
  * var fontDescriptors = {
  *	FTFonts: {
- *		normal: 'fonts/FTFonts-Regular.ttf',
- *		bold: 'fonts/FTFonts-Medium.ttf',
- *		italics: 'fonts/FTFonts-Italic.ttf',
- *		bolditalics: 'fonts/FTFonts-MediumItalic.ttf'
+ *		normal: 'fonts/regular.ttf',
+ *		bold: 'fonts/bold.ttf',
+ *		italics: 'fonts/italic.ttf',
+ *		bolditalics: 'fonts/bolditalic.ttf'
  *	}
  * };
  *
