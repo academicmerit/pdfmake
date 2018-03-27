@@ -17,10 +17,10 @@ IntegrationTestHelper.prototype.renderPages = function (sizeName, docDefinition)
 	docDefinition.images = docDefinition.images || {};
 	var fontDescriptors = {
 		FTFonts: {
-			normal: 'tests/fonts/regular.ttf',
-			bold: 'tests/fonts/bold.ttf',
-			italics: 'tests/fonts/italic.ttf',
-			bolditalics: 'tests/fonts/italic.ttf'
+			normal: 'tests/fonts/FTFonts-Regular.ttf',
+			bold: 'tests/fonts/FTFonts-Medium.ttf',
+			italics: 'tests/fonts/FTFonts-Italic.ttf',
+			bolditalics: 'tests/fonts/FTFonts-Italic.ttf'
 		}
 	};
 

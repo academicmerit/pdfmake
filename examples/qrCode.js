@@ -6,10 +6,10 @@ function mp(relFontPath) {
 
 var fonts = {
 	FTFonts: {
-		normal: mp('./fonts/regular.ttf'),
-		bold: mp('./fonts/bold.ttf'),
-		italics: mp('./fonts/italic.ttf'),
-		bolditalics: mp('./fonts/bolditalic.ttf')
+		normal: mp('./fonts/FTFonts-Regular.ttf'),
+		bold: mp('./fonts/FTFonts-Medium.ttf'),
+		italics: mp('./fonts/FTFonts-Italic.ttf'),
+		bolditalics: mp('./fonts/FTFonts-MediumItalic.ttf')
 	}
 };
 
