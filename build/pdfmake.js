@@ -4250,7 +4250,6 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
         if (item.image) {
 			docMeasure.measureImage(item);
 			item.height = item._height + 5;
-			item.width = item._width + 10;
 		} else {
 			item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
 			item.height = font.lineHeight(fontSize) * lineHeight;
@@ -12689,10 +12688,10 @@ var saveAs = FileSaver.saveAs;
 
 var defaultClientFonts = {
 	FTFonts: {
-		normal: 'FTFonts-Regular.ttf',
-		bold: 'FTFonts-Medium.ttf',
-		italics: 'FTFonts-Italic.ttf',
-		bolditalics: 'FTFonts-MediumItalic.ttf'
+		normal: 'regular.ttf',
+		bold: 'bold.ttf',
+		italics: 'italic.ttf',
+		bolditalics: 'bolditalic.ttf'
 	}
 };
 
@@ -13119,10 +13118,10 @@ var isArray = __webpack_require__(0).isArray;
  * @example
  * var fontDescriptors = {
  *	FTFonts: {
- *		normal: 'fonts/FTFonts-Regular.ttf',
- *		bold: 'fonts/FTFonts-Medium.ttf',
- *		italics: 'fonts/FTFonts-Italic.ttf',
- *		bolditalics: 'fonts/FTFonts-MediumItalic.ttf'
+ *		normal: 'fonts/regular.ttf',
+ *		bold: 'fonts/bold.ttf',
+ *		italics: 'fonts/italic.ttf',
+ *		bolditalics: 'fonts/bolditalic.ttf'
  *	}
  * };
  *
@@ -47927,8 +47926,8 @@ exports.transformDictionaryWord = function(dst, idx, word, len, transform) {
       "Times-Italic": function() {
         return fs.readFileSync(__dirname + "/../font/data/Times-Italic.afm", 'utf8');
       },
-      "Times-BoldItalic": function() {
-        return fs.readFileSync(__dirname + "/../font/data/Times-BoldItalic.afm", 'utf8');
+      "Times-bolditalic": function() {
+        return fs.readFileSync(__dirname + "/../font/data/Times-bolditalic.afm", 'utf8');
       },
       "Symbol": function() {
         return fs.readFileSync(__dirname + "/../font/data/Symbol.afm", 'utf8');

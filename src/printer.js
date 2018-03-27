@@ -25,10 +25,10 @@ var isArray = require('./helpers').isArray;
  * @example
  * var fontDescriptors = {
  *	FTFonts: {
- *		normal: 'fonts/FTFonts-Regular.ttf',
- *		bold: 'fonts/FTFonts-Medium.ttf',
- *		italics: 'fonts/FTFonts-Italic.ttf',
- *		bolditalics: 'fonts/FTFonts-MediumItalic.ttf'
+ *		normal: 'fonts/regular.ttf',
+ *		bold: 'fonts/bold.ttf',
+ *		italics: 'fonts/italic.ttf',
+ *		bolditalics: 'fonts/bolditalic.ttf'
  *	}
  * };
  *
