@@ -427,15 +427,15 @@ function renderLine(line, x, y, pdfKitDoc) {
 			options.features = inline.fontFeatures;
 		}
 
-		pdfKitDoc.fill(inline.color || 'black');
 
-		pdfKitDoc._font = inline.font;
-		pdfKitDoc.fontSize(inline.fontSize);
-                if (inline.image) {
-		        pdfKitDoc.image(inline.image, x + inline.x, y, {width: inline.width});
-                } else {
-		        pdfKitDoc.text(inline.text, x + inline.x, y + shiftToBaseline, options);
-                }
+    if (inline.image) {
+			pdfKitDoc.image(inline.image, x + inline.x, y, {width: inline.width});
+    } else {
+			pdfKitDoc._font = inline.font;
+			pdfKitDoc.fontSize(inline.fontSize);
+			pdfKitDoc.fill(inline.color || 'black');
+			pdfKitDoc.text(inline.text, x + inline.x, y + shiftToBaseline, options);
+    }
 
 		if (inline.linkToPage) {
 			var _ref = pdfKitDoc.ref({Type: 'Action', S: 'GoTo', D: [inline.linkToPage, 0, 0]}).end();
