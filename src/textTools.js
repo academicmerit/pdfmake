@@ -263,8 +263,10 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 
 		var font = fontProvider.provideFont(fontName, bold, italics);
 
-                if (item.image) {
-			docMeasure.measureImage(item)
+    if (item.image) {
+			var dimensions = docMeasure.measureImage(item);
+			item.width = dimensions._width;
+			item.height = dimensions._height;
 		} else {
 			item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
 			item.height = font.lineHeight(fontSize) * lineHeight;
