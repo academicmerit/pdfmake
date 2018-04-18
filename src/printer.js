@@ -400,7 +400,7 @@ function renderLine(line, x, y, pdfKitDoc) {
 
 
     if (inline.image) {
-			pdfKitDoc.image(inline.image, x + inline.x, y, {width: inline.width});
+			pdfKitDoc.image(inline.image, x + inline.x, y, {width: inline.width, height: lineHeight});
     } else {
 			pdfKitDoc._font = inline.font;
 			pdfKitDoc.fontSize(inline.fontSize);
