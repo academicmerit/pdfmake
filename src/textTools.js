@@ -267,7 +267,7 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 			var dimensions = docMeasure.measureImage(item);
 			item.width = dimensions._width;
 			item._height = parseFloat(dimensions._height);
-			item.height = !isNaN(item._height) && (item._height + 5) || item.height;
+			item.height = !isNaN(item._height) && (item._height) || (font.lineHeight(fontSize) * lineHeight);
 		} else {
 			item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
 			item.height = font.lineHeight(fontSize) * lineHeight;

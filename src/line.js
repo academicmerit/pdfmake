@@ -19,7 +19,9 @@ Line.prototype.getAscenderHeight = function () {
 	var y = 0;
 
 	this.inlines.forEach(function (inline) {
-		y = Math.max(y, inline.font.ascender / 1000 * (inline.image ? inline._height : inline.fontSize));
+		var isInlineImage = inline.image && inline.image.indexOf('__blob:') > 0;
+		y = Math.max(y, inline.font.ascender / 1000 * inline.fontSize);
+		y = isInlineImage ? inline._height : y;
 	});
 	return y;
 };
@@ -63,7 +65,7 @@ Line.prototype.getHeight = function () {
 	var max = 0;
 
 	this.inlines.forEach(function (item) {
-		max = Math.max(max, item.height || 0);
+		max = Math.max(max, item.height || item._height || 0);
 	});
 
 	return max;

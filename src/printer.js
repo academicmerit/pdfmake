@@ -379,13 +379,17 @@ function renderLine(line, x, y, pdfKitDoc) {
 	var lineHeight = line.getHeight();
 	var ascenderHeight = line.getAscenderHeight();
 	var descent = lineHeight - ascenderHeight;
-
+	y = y + descent;
 	textDecorator.drawBackground(line, x, y, pdfKitDoc);
 
 	//TODO: line.optimizeInlines();
 	for (var i = 0, l = line.inlines.length; i < l; i++) {
 		var inline = line.inlines[i];
-		var shiftToBaseline = lineHeight - ((inline.font.ascender / 1000) * inline.fontSize) - descent;
+		// yAligned is used to determine svg images and align them vertically to the line height.
+		// shiftToBaseLine modified to account the image height as well.
+		var shiftToBaseline = lineHeight/2 - ascenderHeight - descent;
+		var yAligned = y - (inline.image ? (inline._height/2) : 0) - descent/2;
+		var isInlineImage = inline.image && (inline.image.indexOf('__blob:') >= 0);
 		var options = {
 			lineBreak: false,
 			textWidth: inline.width,
@@ -400,7 +404,7 @@ function renderLine(line, x, y, pdfKitDoc) {
 
 
     if (inline.image) {
-			pdfKitDoc.image(inline.image, x + inline.x, y, {width: inline.width, height: lineHeight});
+			pdfKitDoc.image(inline.image, x + inline.x, isInlineImage ? yAligned : y - descent,  {width: inline.width});
     } else {
 			pdfKitDoc._font = inline.font;
 			pdfKitDoc.fontSize(inline.fontSize);

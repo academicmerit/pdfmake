@@ -4251,7 +4251,7 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 			var dimensions = docMeasure.measureImage(item);
 			item.width = dimensions._width;
 			item._height = parseFloat(dimensions._height);
-			item.height = !isNaN(item._height) && (item._height + 5) || item.height;
+			item.height = !isNaN(item._height) && (item._height) || (font.lineHeight(fontSize) * lineHeight);
 		} else {
 			item.width = widthOfString(item.text, font, fontSize, characterSpacing, fontFeatures);
 			item.height = font.lineHeight(fontSize) * lineHeight;
@@ -8560,7 +8560,9 @@ Line.prototype.getAscenderHeight = function () {
 	var y = 0;
 
 	this.inlines.forEach(function (inline) {
-		y = Math.max(y, inline.font.ascender / 1000 * (inline.image ? inline._height : inline.fontSize));
+		var isInlineImage = inline.image && inline.image.indexOf('__blob:') > 0;
+		y = Math.max(y, inline.font.ascender / 1000 * inline.fontSize);
+		y = isInlineImage ? inline._height : y;
 	});
 	return y;
 };
@@ -8604,7 +8606,7 @@ Line.prototype.getHeight = function () {
 	var max = 0;
 
 	this.inlines.forEach(function (item) {
-		max = Math.max(max, item.height || 0);
+		max = Math.max(max, item.height || item._height || 0);
 	});
 
 	return max;
@@ -13478,13 +13480,17 @@ function renderLine(line, x, y, pdfKitDoc) {
 	var lineHeight = line.getHeight();
 	var ascenderHeight = line.getAscenderHeight();
 	var descent = lineHeight - ascenderHeight;
-
+	y = y + descent;
 	textDecorator.drawBackground(line, x, y, pdfKitDoc);
 
 	//TODO: line.optimizeInlines();
 	for (var i = 0, l = line.inlines.length; i < l; i++) {
 		var inline = line.inlines[i];
-		var shiftToBaseline = lineHeight - ((inline.font.ascender / 1000) * inline.fontSize) - descent;
+		// yAligned is used to determine svg images and align them vertically to the line height.
+		// shiftToBaseLine modified to account the image height as well.
+		var shiftToBaseline = lineHeight/2 - ascenderHeight - descent;
+		var yAligned = y - (inline.image ? (inline._height/2) : 0) - descent/2;
+		var isInlineImage = inline.image && (inline.image.indexOf('__blob:') >= 0);
 		var options = {
 			lineBreak: false,
 			textWidth: inline.width,
@@ -13499,7 +13505,7 @@ function renderLine(line, x, y, pdfKitDoc) {
 
 
     if (inline.image) {
-			pdfKitDoc.image(inline.image, x + inline.x, y, {width: inline.width, height: lineHeight});
+			pdfKitDoc.image(inline.image, x + inline.x, isInlineImage ? yAligned : y - descent,  {width: inline.width});
     } else {
 			pdfKitDoc._font = inline.font;
 			pdfKitDoc.fontSize(inline.fontSize);
@@ -50084,7 +50090,7 @@ function ImageMeasure(pdfKitDoc, imageDictionary) {
 ImageMeasure.prototype.measureImage = function (src) {
 	var image, label;
 	var that = this;
-	var scale = .75 // related to issue #328
+	var scale = .7 // related to issue #328
 
 	if (!this.pdfKitDoc._imageRegistry[src]) {
 		label = 'I' + (++this.pdfKitDoc._imageCount);
