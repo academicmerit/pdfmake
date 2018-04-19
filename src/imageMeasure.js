@@ -8,7 +8,7 @@ function ImageMeasure(pdfKitDoc, imageDictionary) {
 ImageMeasure.prototype.measureImage = function (src) {
 	var image;
 	var that = this;
-	var scale = .75 // related to issue #328
+	var scale = .7 // related to issue #328
 
 	if (!this.pdfKitDoc._imageRegistry[src]) {
 		try {
