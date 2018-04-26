@@ -577,7 +577,9 @@ LayoutBuilder.prototype.processList = function (orderedList, node) {
 				var markerLine = new Line(self.pageSize.width);
 				markerLine.addInline(marker._inlines[0]);
 				markerLine.x = -marker._minWidth;
-				markerLine.y = line.getAscenderHeight() - markerLine.getAscenderHeight();
+				// 2 is a magic number, 1/4 of the font-size. Probably losts because of the
+				// float numbers approximation.
+				markerLine.y = line.getHeight()/2 - line.getAscenderHeight()/2 - 2;
 				self.writer.addLine(markerLine, true);
 			}
 		}
