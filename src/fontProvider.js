@@ -35,21 +35,26 @@ function FontProvider(fontDescriptors, pdfKitDoc) {
 
 FontProvider.prototype.provideFont = function (familyName, bold, italics) {
 	var type = typeName(bold, italics);
-	if (!this.fonts[familyName] || !this.fonts[familyName][type]) {
-		throw new Error('Font \'' + familyName + '\' in style \'' + type + '\' is not defined in the font section of the document definition.');
+	var safeFamilyName = familyName;
+	// fallback to default font if nothing found
+	if (typeof(familyName) !== 'string') {
+		safeFamilyName = 'Roboto';
+	}
+	if (!this.fonts[safeFamilyName] || !this.fonts[safeFamilyName][type]) {
+		throw new Error('Font \'' + safeFamilyName + '\' in style \'' + type + '\' is not defined in the font section of the document definition.');
 	}
 
-	this.fontCache[familyName] = this.fontCache[familyName] || {};
+	this.fontCache[safeFamilyName] = this.fontCache[safeFamilyName] || {};
 
-	if (!this.fontCache[familyName][type]) {
-		var def = this.fonts[familyName][type];
+	if (!this.fontCache[safeFamilyName][type]) {
+		var def = this.fonts[safeFamilyName][type];
 		if (!isArray(def)) {
 			def = [def];
 		}
-		this.fontCache[familyName][type] = this.pdfKitDoc.font.apply(this.pdfKitDoc, def)._font;
+		this.fontCache[safeFamilyName][type] = this.pdfKitDoc.font.apply(this.pdfKitDoc, def)._font;
 	}
 
-	return this.fontCache[familyName][type];
+	return this.fontCache[safeFamilyName][type];
 };
 
 module.exports = FontProvider;
