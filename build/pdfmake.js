@@ -4274,6 +4274,7 @@ function measure(fontProvider, textArray, styleContextStack, docMeasure) {
 			item.trailingCut = 0;
 		}
 
+		item.leadingCut = item.image ? 0 : item.leadingCut;
 		item.alignment = getStyleProperty(item, styleContextStack, 'alignment', 'left');
 		item.font = font;
 		item.fontSize = fontSize;
