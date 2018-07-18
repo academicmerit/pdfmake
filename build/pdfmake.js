@@ -50098,16 +50098,6 @@ function ImageMeasure(pdfKitDoc, imageDictionary) {
 ImageMeasure.prototype.measureImage = function (src) {
 	var image, label;
 	var that = this;
-	/*
-	 * To keep the svg quality we convert it to jpeg
-	 * with dimension multiplied by 2.
-	 * And now we need to downscale it to keep the proper size.
-	 **/
-	var svgDownscaleRate = 1;
-	if (src.indexOf('__blob:') >= 0) {
-		svgDownscaleRate = 2;
-	}
-	var scale = .7 // related to issue #328
 
 	if (!this.pdfKitDoc._imageRegistry[src]) {
 		label = 'I' + (++this.pdfKitDoc._imageCount);
@@ -50120,10 +50110,8 @@ ImageMeasure.prototype.measureImage = function (src) {
 			throw 'invalid image, images dictionary should contain dataURL entries (or local file paths in node.js)';
 		}
 		image.embed(this.pdfKitDoc);
-
-		image.width = (image.width / svgDownscaleRate) * scale
-		image.height = (image.height / svgDownscaleRate) * scale
-
+        image.width = image.width * .333;
+        image.height = image.height * .333;
 		this.pdfKitDoc._imageRegistry[src] = image;
 	} else {
 		image = this.pdfKitDoc._imageRegistry[src];
@@ -50148,6 +50136,7 @@ ImageMeasure.prototype.measureImage = function (src) {
 };
 
 module.exports = ImageMeasure;
+
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1).Buffer))
 
