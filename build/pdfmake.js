@@ -14308,6 +14308,12 @@ LayoutBuilder.prototype.processTable = function (tableNode) {
 	var rowHeights = tableNode.table.heights;
 	for (var i = 0, l = tableNode.table.body.length; i < l; i++) {
 		processor.beginRow(i, this.writer);
+        if (tableNode.table.dontBreakRows && isNaN(this.writer.writer.context.availableHeight)) {
+          var stackIndex = this.writer.writer.contextStack.length - 1;
+          var previousContext = this.writer.writer.contextStack[stackIndex];
+          var availableHeight = previousContext.pages[previousContext.page].pageSize.height - (previousContext.pageMargins.top + previousContext.pageMargins.bottom);
+          this.writer.writer.context.availableHeight = availableHeight;
+        }
 
 		var height;
 		if (isFunction(rowHeights)) {
