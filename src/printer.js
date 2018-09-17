@@ -386,8 +386,10 @@ function renderLine(line, x, y, pdfKitDoc) {
 	for (var i = 0, l = line.inlines.length; i < l; i++) {
 		var inline = line.inlines[i];
 		// yAligned is used to determine svg images and align them vertically to the line height.
-		// shiftToBaseLine modified to account the image height as well.
-		var shiftToBaseline = lineHeight/2 - ascenderHeight - descent;
+		// shiftToBaseline modified to account the image height as well.
+		var shiftToBaseline = inline.hasOwnProperty('baselineAt')
+          ? inline.baselineAt
+          : (lineHeight/2 - ascenderHeight - descent);
 		var yAligned = y - (inline.image ? (inline._height/2) : 0) - descent/2;
 		var isInlineImage = inline.image && (inline.image.indexOf('__blob:') >= 0);
 		var options = {
