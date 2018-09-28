@@ -67,7 +67,7 @@ function drawDecoration(group, x, y, pdfKitDoc) {
 
 	switch (group.decoration) {
 		case 'underline':
-			y += lineAscent + descent * 0.45;
+			y += height / 2;
 			break;
 		case 'overline':
 			y += lineAscent - (ascent * 0.85);
